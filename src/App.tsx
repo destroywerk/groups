@@ -55,6 +55,8 @@ import CategoryIcon from '@mui/icons-material/Category';
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import CloseIcon from '@mui/icons-material/Close';
+import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
+import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 
 const LayoutRoot = styled(Box)({
   display: 'flex',
@@ -145,6 +147,12 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
     backgroundColor: 'rgba(0, 0, 0, 0.04)',
     cursor: 'pointer',
   },
+  '&.selected': {
+    backgroundColor: 'rgba(33, 150, 243, 0.04)',
+    '&:hover': {
+      backgroundColor: 'rgba(33, 150, 243, 0.08)',
+    },
+  },
   '& .MuiCheckbox-root': {
     color: 'rgba(0, 0, 0, 0.16)',
     '& .MuiSvgIcon-root': {
@@ -191,7 +199,7 @@ const UsageChip = styled(Chip)<{ type: string }>(({ theme, type }) => ({
     type === 'Workflows' ? '#1B5E20' :
     type === 'Performance cycle' ? '#1565C0' :
     '#6A1B9A',
-  borderRadius: '16px',
+  borderRadius: '8px',
   height: '24px',
   fontWeight: 500,
   fontSize: '13px',
@@ -201,7 +209,7 @@ const UsageChip = styled(Chip)<{ type: string }>(({ theme, type }) => ({
 const ActionButton = styled(Button)(({ theme }) => ({
   textTransform: 'none',
   padding: '6px 12px',
-  borderRadius: '12px',
+  borderRadius: '8px',
   fontSize: '14px',
   fontWeight: 500,
   height: '32px',
@@ -230,6 +238,35 @@ const StyledListItem = styled(ListItem)({
     backgroundColor: 'rgba(0, 0, 0, 0.04)',
   },
 });
+
+const SearchContainer = styled(Box)(({ theme }) => ({
+  transition: theme.transitions.create(['width', 'margin'], {
+    easing: theme.transitions.easing.easeInOut,
+    duration: theme.transitions.duration.standard,
+  }),
+  display: 'flex',
+  alignItems: 'center',
+  width: 240,
+  marginRight: '8px',
+  '&.collapsed': {
+    width: 32,
+    marginRight: '16px',
+    '& .MuiOutlinedInput-root': {
+      backgroundColor: 'transparent',
+      '& fieldset': {
+        opacity: 0,
+      },
+    },
+    '& .MuiInputBase-input': {
+      opacity: 0,
+      width: 0,
+      padding: 0,
+    },
+    '& .search-icon': {
+      color: 'rgba(0, 0, 0, 0.54)',
+    },
+  },
+}));
 
 const menuItems = [
   { icon: <HomeIcon />, text: 'Home' },
@@ -369,6 +406,19 @@ const App: React.FC = () => {
     });
   };
 
+  const handleDrawerNavigation = (direction: 'up' | 'down') => {
+    if (!selectedGroup) return;
+    
+    const currentIndex = sortedGroups.findIndex(group => group.id === selectedGroup.id);
+    if (currentIndex === -1) return;
+
+    const nextIndex = direction === 'up' 
+      ? (currentIndex - 1 + sortedGroups.length) % sortedGroups.length
+      : (currentIndex + 1) % sortedGroups.length;
+
+    setSelectedGroup(sortedGroups[nextIndex]);
+  };
+
   return (
     <LayoutRoot>
       <Sidebar>
@@ -470,43 +520,65 @@ const App: React.FC = () => {
             Filter
           </ActionButton>
           <Box sx={{ flex: 1 }} />
-          <TextField
-            size="small"
-            placeholder="Search groups..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            sx={{
-              width: '240px',
-              mr: 1,
-              '& .MuiOutlinedInput-root': {
-                height: '32px',
-                minHeight: '32px',
-                borderRadius: '12px',
-                fontSize: '14px',
-                '& fieldset': {
-                  borderColor: 'rgba(0, 0, 0, 0.12)',
+          <SearchContainer className={selectedGroup ? 'collapsed' : ''}>
+            <TextField
+              size="small"
+              placeholder="Search groups..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              sx={{
+                width: '100%',
+                '& .MuiOutlinedInput-root': {
+                  height: '34px',
+                  minHeight: '34px',
+                  borderRadius: '8px',
+                  fontSize: '14px',
+                  transition: theme => theme.transitions.create(['background-color', 'border-color'], {
+                    easing: theme.transitions.easing.easeInOut,
+                    duration: theme.transitions.duration.standard,
+                  }),
+                  backgroundColor: '#fff',
+                  padding: 0,
+                  '& fieldset': {
+                    borderColor: 'rgba(0, 0, 0, 0.12)',
+                    transition: theme => theme.transitions.create(['opacity', 'border-color'], {
+                      easing: theme.transitions.easing.easeInOut,
+                      duration: theme.transitions.duration.standard,
+                    }),
+                  },
+                  '&:hover fieldset': {
+                    borderColor: 'rgba(0, 0, 0, 0.23)',
+                  },
+                  '& input': {
+                    padding: '7px 12px 7px 0',
+                    height: '20px',
+                    transition: theme => theme.transitions.create(['opacity', 'width', 'padding'], {
+                      easing: theme.transitions.easing.easeInOut,
+                      duration: theme.transitions.duration.standard,
+                    }),
+                  },
+                  '& .MuiInputAdornment-root': {
+                    marginLeft: '12px',
+                    marginRight: 0,
+                    '& .search-icon': {
+                      fontSize: 20,
+                      transition: theme => theme.transitions.create(['color'], {
+                        easing: theme.transitions.easing.easeInOut,
+                        duration: theme.transitions.duration.standard,
+                      }),
+                    },
+                  },
                 },
-                '&:hover fieldset': {
-                  borderColor: 'rgba(0, 0, 0, 0.23)',
-                },
-                '& input': {
-                  padding: '6px 12px 6px 0',
-                  height: '20px',
-                },
-                '& .MuiInputAdornment-root': {
-                  marginRight: '2px',
-                  marginLeft: '8px',
-                },
-              },
-            }}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <SearchIcon sx={{ fontSize: 20, color: 'rgba(0, 0, 0, 0.54)' }} />
-                </InputAdornment>
-              ),
-            }}
-          />
+              }}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <SearchIcon className="search-icon" sx={{ color: 'rgba(0, 0, 0, 0.54)' }} />
+                  </InputAdornment>
+                ),
+              }}
+            />
+          </SearchContainer>
           <ActionButton
             variant="contained"
             startIcon={<AddIcon />}
@@ -584,6 +656,7 @@ const App: React.FC = () => {
                       key={group.id} 
                       onClick={() => handleRowClick(group)}
                       selected={selectedRows.includes(group.id)}
+                      className={selectedGroup?.id === group.id ? 'selected' : ''}
                     >
                       <StyledTableCell padding="checkbox" onClick={(e) => e.stopPropagation()}>
                         <Checkbox 
@@ -652,6 +725,7 @@ const App: React.FC = () => {
                 boxSizing: 'border-box',
                 border: 'none',
                 borderLeft: '1px solid rgba(0, 0, 0, 0.12)',
+                boxShadow: '-4px 0 8px -4px rgba(0, 0, 0, 0.05)',
                 backgroundColor: '#fff',
                 height: '100vh',
                 top: 0,
@@ -662,22 +736,52 @@ const App: React.FC = () => {
               <>
                 <Box
                   sx={{
-                    p: '24px',
-                    borderBottom: '1px solid rgba(0, 0, 0, 0.12)',
+                    pt: '64px',
                     position: 'relative',
                   }}
                 >
-                  <IconButton
-                    onClick={handleDrawerClose}
-                    sx={{
-                      position: 'absolute',
-                      right: 16,
-                      top: 16,
-                      color: 'rgba(0, 0, 0, 0.54)',
-                    }}
-                  >
-                    <CloseIcon />
-                  </IconButton>
+                  <Box sx={{
+                    position: 'absolute',
+                    top: 16,
+                    left: 16,
+                    display: 'flex',
+                    alignItems: 'center',
+                  }}>
+                    <IconButton
+                      onClick={handleDrawerClose}
+                      sx={{
+                        color: 'rgba(0, 0, 0, 0.54)',
+                      }}
+                    >
+                      <CloseIcon />
+                    </IconButton>
+                  </Box>
+                  
+                  <Box sx={{
+                    position: 'absolute',
+                    top: 16,
+                    right: 16,
+                    display: 'flex',
+                    gap: 1,
+                  }}>
+                    <IconButton
+                      onClick={() => handleDrawerNavigation('up')}
+                      sx={{
+                        color: 'rgba(0, 0, 0, 0.54)',
+                      }}
+                    >
+                      <KeyboardArrowUpIcon />
+                    </IconButton>
+                    <IconButton
+                      onClick={() => handleDrawerNavigation('down')}
+                      sx={{
+                        color: 'rgba(0, 0, 0, 0.54)',
+                      }}
+                    >
+                      <KeyboardArrowDownIcon />
+                    </IconButton>
+                  </Box>
+
                   <Typography
                     variant="h6"
                     sx={{
@@ -685,30 +789,46 @@ const App: React.FC = () => {
                       fontWeight: 600,
                       color: 'rgba(0, 0, 0, 0.87)',
                       mb: 3,
-                      pr: 4,
+                      px: 3,
                     }}
                   >
                     {selectedGroup.name}
                   </Typography>
 
-                  <Typography
-                    sx={{
-                      fontSize: '14px',
-                      color: 'rgba(0, 0, 0, 0.6)',
-                      fontWeight: 500,
-                      mb: 1,
-                    }}
-                  >
-                    Owner
-                  </Typography>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <Avatar src={selectedGroup.owner.avatar} />
-                    <Typography>{selectedGroup.owner.name}</Typography>
+                  <Box sx={{ px: 3 }}>
+                    <Typography
+                      sx={{
+                        fontSize: '14px',
+                        color: 'rgba(0, 0, 0, 0.6)',
+                        fontWeight: 500,
+                        mb: 1,
+                      }}
+                    >
+                      Owner
+                    </Typography>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <Avatar 
+                        src={selectedGroup.owner.avatar} 
+                        sx={{
+                          width: 24,
+                          height: 24,
+                        }}
+                      />
+                      <Typography
+                        sx={{
+                          fontSize: '14px',
+                          color: 'rgba(0, 0, 0, 0.87)',
+                        }}
+                      >
+                        {selectedGroup.owner.name}
+                      </Typography>
+                    </Box>
                   </Box>
                 </Box>
 
                 <Box sx={{ 
-                  p: '24px',
+                  pt: '8px',
+                  px: '24px',
                   flex: 1,
                   display: 'flex',
                   flexDirection: 'column',
@@ -732,6 +852,7 @@ const App: React.FC = () => {
                     flexDirection: 'column',
                     flex: 1,
                     overflow: 'hidden',
+                    mt: 3,
                   }}>
                     <Box sx={{ 
                       mb: 2, 
@@ -739,15 +860,37 @@ const App: React.FC = () => {
                       alignItems: 'center', 
                       justifyContent: 'space-between'
                     }}>
-                      <Typography
-                        sx={{
-                          fontSize: '14px',
-                          color: 'rgba(0, 0, 0, 0.6)',
-                          fontWeight: 500,
-                        }}
-                      >
-                        Members ({selectedGroup.members.length})
-                      </Typography>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <Typography
+                          sx={{
+                            fontSize: '14px',
+                            color: 'rgba(0, 0, 0, 0.6)',
+                            fontWeight: 500,
+                          }}
+                        >
+                          Members
+                        </Typography>
+                        <Box sx={{
+                          backgroundColor: 'rgba(0, 0, 0, 0.08)',
+                          borderRadius: '16px',
+                          padding: '2px 8px',
+                          minWidth: '24px',
+                          height: '20px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                        }}>
+                          <Typography
+                            sx={{
+                              fontSize: '12px',
+                              color: 'rgba(0, 0, 0, 0.6)',
+                              fontWeight: 500,
+                            }}
+                          >
+                            {selectedGroup.members.length}
+                          </Typography>
+                        </Box>
+                      </Box>
                       <TextField
                         size="small"
                         placeholder="Search members..."
@@ -757,8 +900,9 @@ const App: React.FC = () => {
                           width: '180px',
                           '& .MuiOutlinedInput-root': {
                             height: '32px',
-                            borderRadius: '12px',
+                            borderRadius: '8px',
                             fontSize: '13px',
+                            padding: 0,
                             '& fieldset': {
                               borderColor: 'rgba(0, 0, 0, 0.12)',
                             },
@@ -770,8 +914,8 @@ const App: React.FC = () => {
                               height: '20px',
                             },
                             '& .MuiInputAdornment-root': {
-                              marginRight: '2px',
-                              marginLeft: '8px',
+                              marginLeft: '12px',
+                              marginRight: 0,
                             },
                           },
                         }}
@@ -818,10 +962,18 @@ const App: React.FC = () => {
                           sx={{
                             fontSize: '13px',
                             color: 'rgba(0, 0, 0, 0.6)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 1,
                             py: 1,
                             px: 2,
                           }}
                         >
+                          <svg width="14" height="14" viewBox="0 0 14 15" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path fillRule="evenodd" clipRule="evenodd" d="M8.4499 2.92441C8.44969 2.55186 8.14767 2.24971 7.7751 2.2496H6.42451C6.05203 2.24981 5.74992 2.55193 5.74971 2.92441V3.59999H8.4499V2.92441ZM4.4001 2.92441V3.59999H2.37451C1.25645 3.6002 0.350308 4.50634 0.350098 5.62441V7.8748V12.3744C0.350098 13.4927 1.25631 14.3996 2.37451 14.3998H11.8247C12.9431 14.3998 13.8501 13.4928 13.8501 12.3744V7.8748V5.62441C13.8499 4.50621 12.943 3.59999 11.8247 3.59999H9.79951V2.92441C9.7993 1.80628 8.89326 0.900099 7.7751 0.899994H6.42451C5.30645 0.900205 4.40031 1.80634 4.4001 2.92441ZM12.4995 7.19999V5.62441C12.4993 5.2518 12.1974 4.9496 11.8247 4.9496H2.37451C2.00203 4.94981 1.69992 5.25193 1.69971 5.62441V7.19999H4.1749H10.0249H12.4995ZM9.3501 8.5496V9.22441C9.3501 9.5972 9.65211 9.90019 10.0249 9.90019C10.3977 9.90019 10.6997 9.5972 10.6997 9.22441V8.5496H12.4995V12.3744C12.4995 12.7472 12.1975 13.0502 11.8247 13.0502H2.37451C2.0019 13.05 1.69971 12.7471 1.69971 12.3744V8.5496H3.5001V9.22441C3.5001 9.5972 3.80211 9.90019 4.1749 9.90019C4.54769 9.90019 4.84971 9.5972 4.84971 9.22441V8.5496H9.3501Z" 
+                              fill="rgba(0, 0, 0, 0.54)"
+                            />
+                          </svg>
                           Position
                         </Typography>
                       </Box>
