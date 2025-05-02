@@ -96,13 +96,14 @@ const MainContent = styled(Box)(({ theme }) => ({
   flex: 1,
   display: 'flex',
   flexDirection: 'column',
-  overflow: 'hidden',
   backgroundColor: '#fff',
+  paddingTop: '16px',
   transition: theme.transitions.create(['margin'], {
     easing: theme.transitions.easing.easeInOut,
     duration: theme.transitions.duration.standard,
   }),
   marginRight: 0,
+  width: '100%',
   '&.content-shifted': {
     transition: theme.transitions.create(['margin'], {
       easing: theme.transitions.easing.easeInOut,
@@ -117,27 +118,38 @@ const Header = styled(Box)(({ theme }) => ({
   backgroundColor: '#fff',
   display: 'flex',
   alignItems: 'center',
-  padding: '0 24px',
+  padding: '0 24px 0 40px',
 }));
 
 const TableControls = styled(Box)(({ theme }) => ({
   display: 'flex',
   alignItems: 'center',
   gap: '12px',
-  padding: '16px 24px',
+  padding: '16px 24px 16px 40px',
   backgroundColor: '#fff',
 }));
 
 const Content = styled(Box)(({ theme }) => ({
   flex: 1,
   backgroundColor: '#fff',
-  overflow: 'hidden',
+  display: 'flex',
+  flexDirection: 'column',
+  width: '100%',
 }));
 
 const TableWrapper = styled(Box)({
-  overflow: 'auto',
+  flex: 1,
+  display: 'flex',
+  flexDirection: 'column',
+  backgroundColor: '#fff',
+  width: '100%',
+  overflowX: 'auto',
+  paddingLeft: '40px',
   '& .MuiTable-root': {
-    minWidth: 1000,
+    width: '100%',
+    tableLayout: 'auto',
+    minWidth: 0,
+    marginLeft: 0,
   },
 });
 
@@ -168,6 +180,9 @@ const StyledTableCell = styled(TableCell)(({ theme }) => ({
   padding: '4px 16px',
   height: '36px',
   borderBottom: '1px solid rgba(0, 0, 0, 0.12)',
+  whiteSpace: 'nowrap',
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
   '&.MuiTableCell-head': {
     backgroundColor: '#fff',
     fontWeight: 500,
@@ -185,6 +200,26 @@ const StyledTableCell = styled(TableCell)(({ theme }) => ({
         fontSize: '16px',
       },
     },
+  },
+  '&.MuiTableCell-paddingCheckbox': {
+    width: '40px',
+    paddingLeft: 0,
+    paddingRight: 0,
+    '& .MuiCheckbox-root': {
+      padding: 8,
+    },
+  },
+  '&.name-column': {
+    paddingLeft: 8,
+  },
+  '&.members-column': {
+    width: '15%',
+  },
+  '&.usage-column': {
+    width: '35%',
+  },
+  '&.owner-column': {
+    width: '25%',
   },
 }));
 
@@ -215,7 +250,8 @@ const ActionButton = styled(Button)(({ theme }) => ({
   height: '32px',
   minHeight: '32px',
   '&.MuiButton-text': {
-    color: 'rgba(0, 0, 0, 0.87)',
+    color: 'rgba(0, 0, 0, 0.6)',
+    padding: '6px 12px',
     '&:hover': {
       backgroundColor: 'rgba(0, 0, 0, 0.04)',
     },
@@ -612,7 +648,7 @@ const App: React.FC = () => {
                         }}
                       />
                     </StyledTableCell>
-                    <StyledTableCell>
+                    <StyledTableCell className="name-column">
                       <div className="column-header" onClick={() => handleSort('name')}>
                         <GroupsIcon />
                         Name
@@ -621,7 +657,7 @@ const App: React.FC = () => {
                         )}
                       </div>
                     </StyledTableCell>
-                    <StyledTableCell align="center">
+                    <StyledTableCell className="members-column" align="center">
                       <div className="column-header" onClick={() => handleSort('members')}>
                         <PersonIcon />
                         # Members
@@ -630,7 +666,7 @@ const App: React.FC = () => {
                         )}
                       </div>
                     </StyledTableCell>
-                    <StyledTableCell>
+                    <StyledTableCell className="usage-column">
                       <div className="column-header" onClick={() => handleSort('usage')}>
                         <CategoryIcon />
                         Usage
@@ -639,7 +675,7 @@ const App: React.FC = () => {
                         )}
                       </div>
                     </StyledTableCell>
-                    <StyledTableCell>
+                    <StyledTableCell className="owner-column">
                       <div className="column-header" onClick={() => handleSort('owner')}>
                         <PersonIcon />
                         Owner
@@ -675,9 +711,9 @@ const App: React.FC = () => {
                           }}
                         />
                       </StyledTableCell>
-                      <StyledTableCell>{group.name}</StyledTableCell>
-                      <StyledTableCell align="center">{group.members.length}</StyledTableCell>
-                      <StyledTableCell>
+                      <StyledTableCell className="name-column">{group.name}</StyledTableCell>
+                      <StyledTableCell className="members-column" align="center">{group.members.length}</StyledTableCell>
+                      <StyledTableCell className="usage-column">
                         {group.usage.map((type, index) => (
                           <UsageChip
                             key={index}
@@ -686,7 +722,7 @@ const App: React.FC = () => {
                           />
                         ))}
                       </StyledTableCell>
-                      <StyledTableCell>
+                      <StyledTableCell className="owner-column">
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                           <Avatar
                             src={group.owner.avatar}
@@ -742,8 +778,8 @@ const App: React.FC = () => {
                 >
                   <Box sx={{
                     position: 'absolute',
-                    top: 16,
-                    left: 16,
+                    top: 24,
+                    left: 24,
                     display: 'flex',
                     alignItems: 'center',
                   }}>
@@ -759,8 +795,8 @@ const App: React.FC = () => {
                   
                   <Box sx={{
                     position: 'absolute',
-                    top: 16,
-                    right: 16,
+                    top: 24,
+                    right: 24,
                     display: 'flex',
                     gap: 1,
                   }}>
@@ -790,44 +826,75 @@ const App: React.FC = () => {
                       color: 'rgba(0, 0, 0, 0.87)',
                       mb: 3,
                       px: 3,
+                      pt: 4,
                     }}
                   >
                     {selectedGroup.name}
                   </Typography>
 
                   <Box sx={{ px: 3 }}>
-                    <Typography
-                      sx={{
-                        fontSize: '14px',
-                        color: 'rgba(0, 0, 0, 0.6)',
-                        fontWeight: 500,
-                        mb: 1,
-                      }}
-                    >
-                      Owner
-                    </Typography>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <Avatar 
-                        src={selectedGroup.owner.avatar} 
-                        sx={{
-                          width: 24,
-                          height: 24,
-                        }}
-                      />
-                      <Typography
-                        sx={{
-                          fontSize: '14px',
-                          color: 'rgba(0, 0, 0, 0.87)',
-                        }}
-                      >
-                        {selectedGroup.owner.name}
-                      </Typography>
+                    <Box sx={{ display: 'flex', gap: 2 }}>
+                      <Box sx={{ minWidth: 160, flex: '0 0 180px' }}>
+                        <Typography
+                          sx={{
+                            fontSize: '14px',
+                            color: 'rgba(0, 0, 0, 0.6)',
+                            fontWeight: 500,
+                            mb: 1,
+                          }}
+                        >
+                          Owner
+                        </Typography>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                          <Avatar 
+                            src={selectedGroup.owner.avatar} 
+                            sx={{
+                              width: 24,
+                              height: 24,
+                            }}
+                          />
+                          <Typography
+                            sx={{
+                              fontSize: '14px',
+                              color: 'rgba(0, 0, 0, 0.87)',
+                              whiteSpace: 'nowrap',
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis',
+                              maxWidth: 120,
+                            }}
+                          >
+                            {selectedGroup.owner.name}
+                          </Typography>
+                        </Box>
+                      </Box>
+
+                      <Box sx={{ flex: 1, minWidth: 0 }}>
+                        <Typography
+                          sx={{
+                            fontSize: '14px',
+                            color: 'rgba(0, 0, 0, 0.6)',
+                            fontWeight: 500,
+                            mb: 1,
+                          }}
+                        >
+                          Usage
+                        </Typography>
+                        <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+                          {selectedGroup.usage.map((type, index) => (
+                            <UsageChip
+                              key={index}
+                              label={type}
+                              type={type}
+                            />
+                          ))}
+                        </Box>
+                      </Box>
                     </Box>
                   </Box>
                 </Box>
 
                 <Box sx={{ 
-                  pt: '8px',
+                  pt: '32px',
                   px: '24px',
                   flex: 1,
                   display: 'flex',
@@ -839,7 +906,7 @@ const App: React.FC = () => {
                       fontSize: '14px',
                       color: 'rgba(0, 0, 0, 0.6)',
                       fontWeight: 500,
-                      mb: 2,
+                      mb: 1,
                     }}
                   >
                     Members are assigned based on the following conditions:
