@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   Table,
   TableBody,
@@ -57,6 +57,7 @@ import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import CloseIcon from '@mui/icons-material/Close';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
+import ClickAwayListener from '@mui/material/ClickAwayListener';
 
 const LayoutRoot = styled(Box)({
   display: 'flex',
@@ -154,7 +155,7 @@ const TableWrapper = styled(Box)({
 });
 
 const StyledTableRow = styled(TableRow)(({ theme }) => ({
-  height: '36px',
+  height: '32px',
   '&:hover': {
     backgroundColor: 'rgba(0, 0, 0, 0.04)',
     cursor: 'pointer',
@@ -336,6 +337,8 @@ const App: React.FC = () => {
     key: 'name' | 'members' | 'usage' | 'owner';
     direction: 'asc' | 'desc';
   } | null>(null);
+  const [memberSearchActive, setMemberSearchActive] = useState(false);
+  const memberSearchInputRef = useRef<HTMLInputElement>(null);
 
   const handleRowClick = (group: Group) => {
     if (selectedGroup?.id === group.id) {
@@ -453,6 +456,17 @@ const App: React.FC = () => {
       : (currentIndex + 1) % sortedGroups.length;
 
     setSelectedGroup(sortedGroups[nextIndex]);
+  };
+
+  const handleMemberSearchIconClick = () => {
+    setMemberSearchActive(true);
+    setTimeout(() => {
+      memberSearchInputRef.current?.focus();
+    }, 100);
+  };
+
+  const handleMemberSearchBlur = () => {
+    if (!memberSearchQuery) setMemberSearchActive(false);
   };
 
   return (
@@ -958,42 +972,63 @@ const App: React.FC = () => {
                           </Typography>
                         </Box>
                       </Box>
-                      <TextField
-                        size="small"
-                        placeholder="Search members..."
-                        value={memberSearchQuery}
-                        onChange={(e) => setMemberSearchQuery(e.target.value)}
-                        sx={{
-                          width: '180px',
-                          '& .MuiOutlinedInput-root': {
-                            height: '32px',
+                      <ClickAwayListener onClickAway={handleMemberSearchBlur}>
+                        <Box
+                          sx={{
+                            position: 'relative',
+                            width: memberSearchActive ? 180 : 32,
+                            transition: 'width 0.3s cubic-bezier(0.4,0,0.2,1)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'flex-end',
+                            background: memberSearchActive ? '#fff' : 'transparent',
                             borderRadius: '8px',
-                            fontSize: '13px',
-                            padding: 0,
-                            '& fieldset': {
-                              borderColor: 'rgba(0, 0, 0, 0.12)',
-                            },
-                            '&:hover fieldset': {
-                              borderColor: 'rgba(0, 0, 0, 0.23)',
-                            },
-                            '& input': {
-                              padding: '6px 12px 6px 0',
-                              height: '20px',
-                            },
-                            '& .MuiInputAdornment-root': {
-                              marginLeft: '12px',
-                              marginRight: 0,
-                            },
-                          },
-                        }}
-                        InputProps={{
-                          startAdornment: (
-                            <InputAdornment position="start">
-                              <SearchIcon sx={{ fontSize: 18, color: 'rgba(0, 0, 0, 0.54)' }} />
-                            </InputAdornment>
-                          ),
-                        }}
-                      />
+                            boxShadow: memberSearchActive ? '0 1px 4px 0 rgba(0,0,0,0.04)' : 'none',
+                            border: memberSearchActive ? '1px solid rgba(0,0,0,0.12)' : 'none',
+                            height: 32,
+                            cursor: memberSearchActive ? 'text' : 'pointer',
+                          }}
+                          onClick={() => {
+                            if (!memberSearchActive) handleMemberSearchIconClick();
+                          }}
+                        >
+                          { !memberSearchActive ? (
+                            <SearchIcon
+                              sx={{
+                                color: 'rgba(0,0,0,0.54)',
+                                fontSize: 20,
+                                position: 'absolute',
+                                right: 8,
+                                top: '50%',
+                                transform: 'translateY(-50%)',
+                                opacity: 1,
+                                transition: 'opacity 0.2s',
+                                pointerEvents: 'auto',
+                              }}
+                            />
+                          ) : null }
+                          <input
+                            ref={memberSearchInputRef}
+                            value={memberSearchQuery}
+                            onChange={e => setMemberSearchQuery(e.target.value)}
+                            onBlur={handleMemberSearchBlur}
+                            placeholder="Search members..."
+                            style={{
+                              width: memberSearchActive ? 180 : 0,
+                              opacity: memberSearchActive ? 1 : 0,
+                              marginLeft: 0,
+                              border: 'none',
+                              outline: 'none',
+                              background: 'transparent',
+                              fontSize: 14,
+                              transition: 'width 0.3s cubic-bezier(0.4,0,0.2,1), opacity 0.2s',
+                              padding: memberSearchActive ? '0 0 0 12px' : 0,
+                              height: 28,
+                              boxSizing: 'border-box',
+                            }}
+                          />
+                        </Box>
+                      </ClickAwayListener>
                     </Box>
 
                     <Box sx={{ 
